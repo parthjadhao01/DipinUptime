@@ -1,5 +1,5 @@
 {
-  "name": "dipinUptime",
+  "name": "dipin-uptime",
   "private": true,
   "scripts": {
     "build": "turbo run build",
