@@ -16,13 +16,15 @@
     "db:test": "tsx scripts/test-database.ts"
   },
   "dependencies": {
-    "@prisma/client": "*",
     "@prisma/adapter-pg": "*",
+    "@prisma/client": "*",
+    "@repo/typescript-config": "*",
     "dotenv": "*",
     "pg": "*"
   },
   "devDependencies": {
-    "prisma": "*",
+    "@types/pg": "^8.16.0",
+    "prisma": "^7.2.0",
     "tsx": "*"
   }
 }
