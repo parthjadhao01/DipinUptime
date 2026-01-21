@@ -44,6 +44,9 @@ app.get("/api/v1/website",async (req,res)=>{
         where : {
             userId : userId,
             disabled : false
+        },
+        include : {
+            ticks : true
         }
     })
     res.json(websites)
