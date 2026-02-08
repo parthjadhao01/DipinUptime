@@ -1,16 +1,28 @@
 import "dotenv/config"
 import express from "express";
-import { prisma } from "@repo/db";
+import {db} from "./config/db.ts"
 import {authMiddleware} from "./middleware";
 
 const app = express();
 
 app.use(express.json());
 
+app.post("/register",async (req,res)=>{
+    const data = await db.user.create({
+        data : {
+            email : "parthjadhao",
+        }
+    })
+    res.send({
+        status : "success",
+        data : data
+    })
+})
+
 app.post("/api/v1/website",authMiddleware,async (req,res)=>{
     const userId = req.userId!;
     const {url} = req.body
-    const data = await prisma.website.create({
+    const data = await db.website.create({
         data : {
             userId,
             url
@@ -24,7 +36,7 @@ app.post("/api/v1/website",authMiddleware,async (req,res)=>{
 app.get("/api/v1//website/status",async (req,res)=>{
     const websiteId = req.query.websiteId! as unknown as string;
     const userId = req.userId!;
-    const data = await prisma.website.findFirst({
+    const data = await db.website.findFirst({
         where : {
             id : websiteId,
             userId : userId,
@@ -40,7 +52,7 @@ app.get("/api/v1//website/status",async (req,res)=>{
 
 app.get("/api/v1/website",async (req,res)=>{
     const userId = req.userId!;
-    const websites = await prisma.website.findMany({
+    const websites = await db.website.findMany({
         where : {
             userId : userId,
             disabled : false
@@ -56,7 +68,7 @@ app.delete("/api/v1/website/:id",async (req,res)=>{
     const websiteId = req.params.id! as unknown as string;
     const userId = req.userId!;
 
-    await prisma.website.update({
+    await db.website.update({
         where : {
             id : websiteId,
             userId : userId
