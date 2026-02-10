@@ -2,6 +2,7 @@
   "name": "@repo/db",
   "version": "0.0.1",
   "type": "module",
+  "main": "generated/client/index.mjs",
   "scripts": {
     "prisma": "prisma",
     "db:push": "prisma db push",

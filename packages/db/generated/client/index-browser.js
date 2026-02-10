@@ -123,7 +123,34 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
-  email: 'email'
+  email: 'email',
+  emailVerified: 'emailVerified',
+  image: 'image',
+  name: 'name',
+  isRegistered: 'isRegistered'
+};
+
+exports.Prisma.AccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  access_token: 'access_token',
+  refresh_token: 'refresh_token',
+  expires_at: 'expires_at'
+};
+
+exports.Prisma.SessionScalarFieldEnum = {
+  id: 'id',
+  sessionToken: 'sessionToken',
+  userId: 'userId',
+  expires: 'expires'
+};
+
+exports.Prisma.VerificationTokenScalarFieldEnum = {
+  identifier: 'identifier',
+  token: 'token',
+  expires: 'expires'
 };
 
 exports.Prisma.WebsiteScalarFieldEnum = {
@@ -158,6 +185,11 @@ exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
 exports.WebsiteStatus = exports.$Enums.WebsiteStatus = {
   Good: 'Good',
   Bad: 'Bad'
@@ -165,6 +197,9 @@ exports.WebsiteStatus = exports.$Enums.WebsiteStatus = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Account: 'Account',
+  Session: 'Session',
+  VerificationToken: 'VerificationToken',
   Website: 'Website',
   Validator: 'Validator',
   WebsiteTicks: 'WebsiteTicks'

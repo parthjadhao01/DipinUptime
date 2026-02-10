@@ -95,7 +95,34 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
-  email: 'email'
+  email: 'email',
+  emailVerified: 'emailVerified',
+  image: 'image',
+  name: 'name',
+  isRegistered: 'isRegistered'
+};
+
+exports.Prisma.AccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  access_token: 'access_token',
+  refresh_token: 'refresh_token',
+  expires_at: 'expires_at'
+};
+
+exports.Prisma.SessionScalarFieldEnum = {
+  id: 'id',
+  sessionToken: 'sessionToken',
+  userId: 'userId',
+  expires: 'expires'
+};
+
+exports.Prisma.VerificationTokenScalarFieldEnum = {
+  identifier: 'identifier',
+  token: 'token',
+  expires: 'expires'
 };
 
 exports.Prisma.WebsiteScalarFieldEnum = {
@@ -130,6 +157,11 @@ exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
 exports.WebsiteStatus = exports.$Enums.WebsiteStatus = {
   Good: 'Good',
   Bad: 'Bad'
@@ -137,6 +169,9 @@ exports.WebsiteStatus = exports.$Enums.WebsiteStatus = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Account: 'Account',
+  Session: 'Session',
+  VerificationToken: 'VerificationToken',
   Website: 'Website',
   Validator: 'Validator',
   WebsiteTicks: 'WebsiteTicks'
@@ -169,7 +204,9 @@ const config = {
         "value": "linux-musl-arm64-openssl-3.0.x"
       }
     ],
-    "previewFeatures": [],
+    "previewFeatures": [
+      "driverAdapters"
+    ],
     "sourceFilePath": "/Users/parthjadhao/Projects/dipinUptime/packages/db/prisma/schema.prisma",
     "isCustomOutput": true
   },
@@ -193,13 +230,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  binaryTargets = [\"native\", \"linux-musl-arm64-openssl-3.0.x\"]\n  output        = \"./../generated/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id      String    @id @default(uuid())\n  email   String\n  Website Website[]\n}\n\nmodel Website {\n  id       String         @id @default(uuid())\n  url      String\n  userId   String\n  User     User           @relation(fields: [userId], references: [id])\n  ticks    WebsiteTicks[]\n  disabled Boolean        @default(false)\n}\n\nmodel Validator {\n  id        String         @id @default(uuid())\n  publicKey String\n  location  String\n  ip        String\n  ticks     WebsiteTicks[]\n}\n\nmodel WebsiteTicks {\n  id          String        @id @default(uuid())\n  websiteId   String\n  validatorId String\n  createdAt   DateTime      @default(now())\n  status      WebsiteStatus\n  latency     Float\n  Website     Website       @relation(fields: [websiteId], references: [id])\n  Validator   Validator     @relation(fields: [validatorId], references: [id])\n}\n\nenum WebsiteStatus {\n  Good\n  Bad\n}\n",
-  "inlineSchemaHash": "70736e99fabc4005a5e1bc8905d90e5e67fdb9fae6d240fa6fb4ed57d62f92f8",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider        = \"prisma-client-js\"\n  binaryTargets   = [\"native\", \"linux-musl-arm64-openssl-3.0.x\"]\n  output          = \"./../generated/client\"\n  previewFeatures = [\"driverAdapters\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id            String    @id @default(cuid())\n  email         String?   @unique\n  emailVerified DateTime?\n  image         String?\n  name          String?\n  isRegistered  Boolean   @default(false)\n  websites      Website[]\n  accounts      Account[]\n  sessions      Session[]\n}\n\nmodel Account {\n  id                String  @id @default(cuid())\n  userId            String\n  provider          String\n  providerAccountId String\n  access_token      String?\n  refresh_token     String?\n  expires_at        Int?\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@unique([provider, providerAccountId])\n}\n\nmodel Session {\n  id           String   @id @default(cuid())\n  sessionToken String   @unique\n  userId       String\n  expires      DateTime\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nmodel VerificationToken {\n  identifier String\n  token      String   @unique\n  expires    DateTime\n\n  @@unique([identifier, token])\n}\n\nmodel Website {\n  id       String         @id @default(uuid())\n  url      String\n  userId   String\n  User     User           @relation(fields: [userId], references: [id])\n  ticks    WebsiteTicks[]\n  disabled Boolean        @default(false)\n}\n\nmodel Validator {\n  id        String         @id @default(uuid())\n  publicKey String\n  location  String\n  ip        String\n  ticks     WebsiteTicks[]\n}\n\nmodel WebsiteTicks {\n  id          String        @id @default(uuid())\n  websiteId   String\n  validatorId String\n  createdAt   DateTime      @default(now())\n  status      WebsiteStatus\n  latency     Float\n  Website     Website       @relation(fields: [websiteId], references: [id])\n  Validator   Validator     @relation(fields: [validatorId], references: [id])\n}\n\nenum WebsiteStatus {\n  Good\n  Bad\n}\n",
+  "inlineSchemaHash": "3ddee7bcc7f6e0127b35cc7bc05f9e3450cbc73b57f400eba5927cc0e9bd9866",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"Website\",\"kind\":\"object\",\"type\":\"Website\",\"relationName\":\"UserToWebsite\"}],\"dbName\":null},\"Website\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"url\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"User\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToWebsite\"},{\"name\":\"ticks\",\"kind\":\"object\",\"type\":\"WebsiteTicks\",\"relationName\":\"WebsiteToWebsiteTicks\"},{\"name\":\"disabled\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null},\"Validator\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"publicKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"location\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"ip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"ticks\",\"kind\":\"object\",\"type\":\"WebsiteTicks\",\"relationName\":\"ValidatorToWebsiteTicks\"}],\"dbName\":null},\"WebsiteTicks\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"websiteId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"validatorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"WebsiteStatus\"},{\"name\":\"latency\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"Website\",\"kind\":\"object\",\"type\":\"Website\",\"relationName\":\"WebsiteToWebsiteTicks\"},{\"name\":\"Validator\",\"kind\":\"object\",\"type\":\"Validator\",\"relationName\":\"ValidatorToWebsiteTicks\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"emailVerified\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isRegistered\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"websites\",\"kind\":\"object\",\"type\":\"Website\",\"relationName\":\"UserToWebsite\"},{\"name\":\"accounts\",\"kind\":\"object\",\"type\":\"Account\",\"relationName\":\"AccountToUser\"},{\"name\":\"sessions\",\"kind\":\"object\",\"type\":\"Session\",\"relationName\":\"SessionToUser\"}],\"dbName\":null},\"Account\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerAccountId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"access_token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"refresh_token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expires_at\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"AccountToUser\"}],\"dbName\":null},\"Session\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sessionToken\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expires\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SessionToUser\"}],\"dbName\":null},\"VerificationToken\":{\"fields\":[{\"name\":\"identifier\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expires\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Website\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"url\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"User\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToWebsite\"},{\"name\":\"ticks\",\"kind\":\"object\",\"type\":\"WebsiteTicks\",\"relationName\":\"WebsiteToWebsiteTicks\"},{\"name\":\"disabled\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null},\"Validator\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"publicKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"location\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"ip\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"ticks\",\"kind\":\"object\",\"type\":\"WebsiteTicks\",\"relationName\":\"ValidatorToWebsiteTicks\"}],\"dbName\":null},\"WebsiteTicks\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"websiteId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"validatorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"WebsiteStatus\"},{\"name\":\"latency\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"Website\",\"kind\":\"object\",\"type\":\"Website\",\"relationName\":\"WebsiteToWebsiteTicks\"},{\"name\":\"Validator\",\"kind\":\"object\",\"type\":\"Validator\",\"relationName\":\"ValidatorToWebsiteTicks\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),
