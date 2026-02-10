@@ -3,9 +3,12 @@
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useSession, signIn, signOut } from "next-auth/react"
+
 
 export function Header() {
     const [isOpen, setIsOpen] = useState(false)
+    const { data: session } = useSession()
 
     return (
         <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -34,9 +37,16 @@ export function Header() {
                 </div>
 
                 <div className="hidden md:flex items-center gap-3">
-                    <Button variant="ghost" size="sm">
-                        Sign In
-                    </Button>
+                    {session ? (
+                        <>
+                            <button onClick={() => signOut()}>Sign out</button>
+                        </>
+                    ) : (
+                        <Button variant="ghost" size="sm" onClick={() => signIn()}>Sign Out
+                            Sign In
+                        </Button>
+                    )}
+
                     <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90">
                         Get Started
                     </Button>

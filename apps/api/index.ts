@@ -7,17 +7,7 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/register",async (req,res)=>{
-    const data = await db.user.create({
-        data : {
-            email : "parthjadhao",
-        }
-    })
-    res.send({
-        status : "success",
-        data : data
-    })
-})
+
 
 app.post("/api/v1/website",authMiddleware,async (req,res)=>{
     const userId = req.userId!;
