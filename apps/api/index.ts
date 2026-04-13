@@ -2,10 +2,17 @@ import "dotenv/config"
 import express from "express";
 import {db} from "./config/db.ts"
 import {authMiddleware} from "./middleware";
+import cookieParser from 'cookie-parser';
+import cors from "cors"
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}));
 
 
 
@@ -40,7 +47,8 @@ app.get("/api/v1//website/status",async (req,res)=>{
     res.json(data)
 })
 
-app.get("/api/v1/website",async (req,res)=>{
+app.get("/api/v1/website",authMiddleware,async (req,res)=>{
+    console.log("testing /api/v1/website get endpoing")
     const userId = req.userId!;
     const websites = await db.website.findMany({
         where : {
@@ -72,5 +80,5 @@ app.delete("/api/v1/website/:id",async (req,res)=>{
 
 
 app.listen(3001,()=>{
-    console.log("Server running on port 3000");
+    console.log("Server running on port 3001");
 });

@@ -1,11 +1,15 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import {createTransport} from "nodemailer"
 import {prisma} from "@repo/db";
+import jwt from "jsonwebtoken"
 
 import EmailProvider, {SendVerificationRequestParams} from "next-auth/providers/email";
 
 export const NEXT_AUTH_CONFIG = {
     adapter: PrismaAdapter(prisma),
+    session : {
+        strategy : "jwt" as const
+    },
     providers: [
         EmailProvider({
             server: {
@@ -48,38 +52,41 @@ export const NEXT_AUTH_CONFIG = {
     ],
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-        async session({ session, user } : any) {
-            session.user.isRegistered = user.isRegistered
+        async jwt({token,user} : any){
+            if(user){
+                token.email = user.email;
+                token.id = user.id;
+
+                const accessToken = jwt.sign(
+                    {
+                        id: token.id,
+                        email: token.email,
+                    },
+                    process.env.NEXTAUTH_SECRET!,
+                    { expiresIn: "1h" }
+                );
+
+                token.accessToken = accessToken;
+            }
+
+            return token;
+        },
+
+        async session({ session, user ,token} : any) {
+            session.user.email = token.email;
+            session.user.id = token.id
+
+            session.accessToken = token.accessToken;
+
             return session
         }
     },
+    pages: {
+        signIn: "/signin",   // your custom sign in page route
+        signOut: "/",        // redirect here after sign out
+        error: "/signin",    // auth errors go back to signin
+    },
 }
-
-
-// async function sendVerificationRequest(params : SendVerificationRequestParams) : Promise<void> {
-//     const transporter = nodemailer.createTransport({
-//         secure : false,
-//         host : process.env.EMAIL_SERVER_HOST,
-//         port : Number(process.env.EMAIL_SERVER_PORT),
-//         auth : {
-//             user : process.env.EMAIL_SERVER_USER,
-//             pass : process.env.EMAIL_SERVER_PASSWORD
-//         }
-//     })
-//     const { identifier, url, provider } = params
-//     const { host } = new URL(url)
-//     const result = await transporter.sendMail({
-//         to: identifier,
-//         from: provider.from,
-//         subject: `Sign in to ${host}`,
-//         text: text({ url, host }),
-//         html: html({ url, host }),
-//     })
-//     const failed = result.rejected.concat(result.pending).filter(Boolean)
-//     if (failed.length) {
-//         throw new Error(`Email(s) (${failed.join(", ")}) could not be sent`)
-//     }
-// }
 
 export function html(params: { url: string; host: string }) {
     const { url, host } = params
