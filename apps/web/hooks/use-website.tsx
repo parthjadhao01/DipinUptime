@@ -4,8 +4,6 @@ import axios from "axios"
 import {API_BACKEND_URL} from "@/config";
 import {clearInterval} from "node:timers";
 
-
-
 interface Website{
     id : string;
     url : string;
