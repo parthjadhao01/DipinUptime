@@ -10,9 +10,7 @@ const secret = process.env.NEXTAUTH_SECRET!;
 
 export const authMiddleware = async (req: AuthRequest  , res : Response  , next : NextFunction ) => {
     try{
-        console.log("authorization middleware")
         const authHeader = req.headers["authorization"];
-        console.log(authHeader)
         if (!authHeader){
             return res.status(401).json("No token provided");
         }
@@ -36,9 +34,7 @@ export const authMiddleware = async (req: AuthRequest  , res : Response  , next 
         let parsedToken;
 
         try{
-            console.log("Parsing the token")
             parsedToken = jwt.verify(rawToken,secret);
-            console.log("Parsed JWT token : ",parsedToken)
         }catch(err){
             return res.status(400).json({
                 message : "Malformed token error",
@@ -53,11 +49,8 @@ export const authMiddleware = async (req: AuthRequest  , res : Response  , next 
         }
 
         req.user = parsedToken;
-        console.log("USER",parsedToken);
-
         next();
     }catch (error){
-        console.error("Auth error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };

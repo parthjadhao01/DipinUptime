@@ -16,8 +16,10 @@ app.use(cors({
 
 
 
-app.post("/api/v1/website",authMiddleware,async (req,res)=>{
-    const userId = req.userId!;
+app.post("/api/v1/website",authMiddleware,async (req ,res)=>{
+    const userId = req?.user?.id!;
+    console.log(userId)
+    console.log(req.body)
     const {url} = req.body
     const data = await db.website.create({
         data : {
@@ -32,7 +34,7 @@ app.post("/api/v1/website",authMiddleware,async (req,res)=>{
 
 app.get("/api/v1//website/status",async (req,res)=>{
     const websiteId = req.query.websiteId! as unknown as string;
-    const userId = req.userId!;
+    const userId = req?.user?.id!;
     const data = await db.website.findFirst({
         where : {
             id : websiteId,
@@ -48,8 +50,7 @@ app.get("/api/v1//website/status",async (req,res)=>{
 })
 
 app.get("/api/v1/website",authMiddleware,async (req,res)=>{
-    console.log("testing /api/v1/website get endpoing")
-    const userId = req.userId!;
+    const userId = req?.user?.id!;
     const websites = await db.website.findMany({
         where : {
             userId : userId,
@@ -64,7 +65,7 @@ app.get("/api/v1/website",authMiddleware,async (req,res)=>{
 
 app.delete("/api/v1/website/:id",async (req,res)=>{
     const websiteId = req.params.id! as unknown as string;
-    const userId = req.userId!;
+    const userId = req?.user?.id!;
 
     await db.website.update({
         where : {
